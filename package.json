@@ -1,0 +1,50 @@
+{
+  "name": "velora-voice",
+  "version": "1.0.0",
+  "description": "Enterprise-grade AI Call Center Dashboard with licensing system, agentic pipeline builder, and one-click deployment",
+  "author": "LuminaDev",
+  "license": "Commercial",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev --parallel",
+    "lint": "turbo run lint",
+    "test": "turbo run test",
+    "clean": "turbo run clean && rm -rf node_modules",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "docker:build": "docker-compose build",
+    "setup": "npm install && npm run db:migrate && npm run seed",
+    "db:migrate": "cd apps/backend && npm run db:migrate",
+    "seed": "cd apps/backend && npm run seed",
+    "start": "npm run docker:up"
+  },
+  "devDependencies": {
+    "turbo": "^1.10.0",
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0",
+    "prettier": "^3.0.0",
+    "eslint": "^8.50.0"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/luminadev/velora-voice"
+  },
+  "keywords": [
+    "ai",
+    "call-center",
+    "dashboard",
+    "enterprise",
+    "licensing",
+    "pipeline",
+    "automation"
+  ]
+}

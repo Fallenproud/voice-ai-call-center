@@ -1,0 +1,123 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String
+  password  String
+  role      UserRole @default(AGENT)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  calls     Call[]
+  pipelines Pipeline[]
+
+  @@map("users")
+}
+
+model Call {
+  id          String     @id @default(cuid())
+  caller      String
+  number      String
+  status      CallStatus @default(QUEUED)
+  duration    Int        @default(0) // in seconds
+  priority    Priority   @default(MEDIUM)
+  department  String
+  transcript  Json?
+  sentiment   Sentiment?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  // Relations
+  agent   User?   @relation(fields: [agentId], references: [id])
+  agentId String?
+
+  @@map("calls")
+}
+
+model Pipeline {
+  id            String        @id @default(cuid())
+  name          String
+  description   String?
+  status        PipelineStatus @default(DRAFT)
+  nodes         Json          // React Flow nodes
+  edges         Json          // React Flow edges
+  executionCount Int          @default(0)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  // Relations
+  creator   User   @relation(fields: [creatorId], references: [id])
+  creatorId String
+
+  @@map("pipelines")
+}
+
+model License {
+  id          String        @id @default(cuid())
+  key         String        @unique
+  type        LicenseType
+  status      LicenseStatus @default(ACTIVE)
+  maxAgents   Int
+  features    Json          // Available features
+  expiresAt   DateTime?
+  createdAt   DateTime      @default(now())
+  activatedAt DateTime?
+
+  @@map("licenses")
+}
+
+// Enums
+enum UserRole {
+  ADMIN
+  MANAGER
+  AGENT
+}
+
+enum CallStatus {
+  ACTIVE
+  COMPLETED
+  MISSED
+  QUEUED
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum Sentiment {
+  POSITIVE
+  NEUTRAL
+  NEGATIVE
+}
+
+enum PipelineStatus {
+  ACTIVE
+  DRAFT
+  DISABLED
+}
+
+enum LicenseType {
+  TRIAL
+  STANDARD
+  ENTERPRISE
+}
+
+enum LicenseStatus {
+  ACTIVE
+  EXPIRED
+  REVOKED
+}

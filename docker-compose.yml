@@ -1,0 +1,115 @@
+version: '3.8'
+
+services:
+  # Frontend - Next.js Application
+  frontend:
+    build:
+      context: ./apps/frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:3001
+      - NEXT_PUBLIC_LICENSE_SERVER_URL=http://localhost:3002
+    depends_on:
+      - backend
+      - license-server
+    networks:
+      - velora-network
+    volumes:
+      - ./apps/frontend:/app
+      - /app/node_modules
+      - /app/.next
+
+  # Backend - NestJS API
+  backend:
+    build:
+      context: ./apps/backend
+      dockerfile: Dockerfile
+    ports:
+      - "3001:3001"
+    environment:
+      - DATABASE_URL=postgresql://velora:velora123@postgres:5432/velora_voice
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - JWT_SECRET=your-super-secret-jwt-key-change-in-production
+      - LICENSE_SERVER_URL=http://license-server:3002
+      - FRONTEND_URL=http://localhost:3000
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - velora-network
+    volumes:
+      - ./apps/backend:/app
+      - /app/node_modules
+      - /app/dist
+
+  # License Server - Standalone Express App
+  license-server:
+    build:
+      context: ./apps/license-server
+      dockerfile: Dockerfile
+    ports:
+      - "3002:3002"
+    environment:
+      - LICENSE_DB_URL=postgresql://velora:velora123@postgres:5432/velora_licenses
+      - ALLOWED_ORIGINS=http://localhost:3000,http://localhost:3001
+      - LICENSE_SECRET=your-super-secret-license-key-change-in-production
+    depends_on:
+      - postgres
+    networks:
+      - velora-network
+    volumes:
+      - ./apps/license-server:/app
+      - /app/node_modules
+      - /app/dist
+
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=velora
+      - POSTGRES_PASSWORD=velora123
+      - POSTGRES_DB=velora_voice
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    networks:
+      - velora-network
+
+  # Redis for Queue Management
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - velora-network
+
+  # pgAdmin for Database Management (Development)
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    ports:
+      - "5050:80"
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=admin@velora.dev
+      - PGADMIN_DEFAULT_PASSWORD=admin123
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    networks:
+      - velora-network
+    profiles:
+      - dev
+
+volumes:
+  postgres_data:
+  redis_data:
+  pgadmin_data:
+
+networks:
+  velora-network:
+    driver: bridge
