@@ -9,6 +9,7 @@
 ## 🚀 Live Demo
 
 ### Currently Deployed Services
+- **Marketing Website**: https://velora-voice-marketing.pages.dev
 - **Frontend Dashboard**: https://3000-ia380sbzn82obbbgku0rj-6532622b.e2b.dev
 - **API Endpoints**: Backend services available for API integration
 - **License System**: Key-based licensing with activation workflow

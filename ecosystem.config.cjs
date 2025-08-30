@@ -19,7 +19,7 @@ module.exports = {
       name: 'velora-backend',
       cwd: './apps/backend',
       script: 'npm',
-      args: 'run start:dev',
+      args: 'run dev',
       env: {
         NODE_ENV: 'development',
         DATABASE_URL: 'postgresql://velora:velora123@localhost:5432/velora_voice',
@@ -38,7 +38,7 @@ module.exports = {
       name: 'velora-license-server',
       cwd: './apps/license-server',
       script: 'npm',
-      args: 'run start:dev',
+      args: 'run dev',
       env: {
         NODE_ENV: 'development',
         LICENSE_SERVER_PORT: 3002,
